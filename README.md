@@ -1,0 +1,2 @@
+# malaskrar
+Málaskrár ráðuneyta
