@@ -32,7 +32,6 @@ class IcelandicDateParserInfo(parser.parserinfo):
             (u"ágú", u"ágúst"),
             (u"sept", u"september"),
             (u"okt", u"október"),
-            # (u"nov", u"nóvember"),
             (u"nóv", u"nóvember"),
             (u"des", u"desember"),
         ]
@@ -102,19 +101,17 @@ def parse_xlsx(ministry, url):
             df = df.assign(ár=year)
             df = df.assign(mánuður=month)
             df = df.assign(ráðuneyti=ministry)
-            # df["Efni"] = df["Efni"].apply(openpyxl.utils.escape.unescape)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
     return dfs
 
 
-xlsx_urls = find_xlsx_files(overview_url)
-
-
-all_dfs = []
-for ministry, url in xlsx_urls.items():
-    print("Parsing {}".format(ministry))
-    dfs = parse_xlsx(ministry, url)
-    all_dfs.append(dfs)
-df = pd.concat(all_dfs)
-df.to_csv("data.csv", sep=";", quoting=csv.QUOTE_ALL)
+if __name__ == "__main__":
+    xlsx_urls = find_xlsx_files(overview_url)
+    all_dfs = []
+    for ministry, url in xlsx_urls.items():
+        print("Parsing {}".format(ministry))
+        dfs = parse_xlsx(ministry, url)
+        all_dfs.append(dfs)
+    df = pd.concat(all_dfs)
+    df.to_csv("data.csv", sep=";", quoting=csv.QUOTE_ALL)
