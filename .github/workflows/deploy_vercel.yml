@@ -45,4 +45,5 @@ jobs:
           --project malaskrar \
           --title "Málaskrár ráðuneyta" \
           --about "Málaskrár ráðuneyta - uppfært tvisvar í viku" \
-          --about_url "https://github.com/pallih/malaskrar" 
+          --about_url "https://github.com/pallih/malaskrar"
+    - uses: stefanzweifel/git-auto-commit-action@v4
