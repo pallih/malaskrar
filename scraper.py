@@ -115,7 +115,7 @@ if __name__ == "__main__":
         dfs = parse_xlsx(ministry, url)
         all_dfs.append(dfs)
     df = pd.concat(all_dfs)
-    export_dir = pathlib.Path.cwd() / "data"
+    export_dir = pathlib.Path.cwd()
     export_dir.mkdir(parents=True, exist_ok=True)
     csv_filename = export_dir / "data.csv"
     db_filename = export_dir / "data.db"
@@ -126,5 +126,3 @@ if __name__ == "__main__":
         "malaskrar",
     )
     table.upsert_many(dicts, ["Málsnúmer", "Mánuður", "Ár"])
-    print(dicts)
-    print(df)
