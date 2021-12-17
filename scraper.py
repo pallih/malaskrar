@@ -6,6 +6,8 @@ import openpyxl
 import csv
 from io import BytesIO
 from tempfile import NamedTemporaryFile
+import pathlib
+import dataset
 
 overview_url = "https://www.stjornarradid.is/gogn/malaskrar-raduneyta/"
 
@@ -93,14 +95,13 @@ def parse_xlsx(ministry, url):
                 BytesIO(stream),
                 header=header_row,
                 sheet_name=sheet.title,
-                index_col=[0],
                 usecols="A:B",
             )
             year = sheetdate.strftime("%Y")
             month = sheetdate.strftime("%m")
-            df = df.assign(ár=year)
-            df = df.assign(mánuður=month)
-            df = df.assign(ráðuneyti=ministry)
+            df = df.assign(Ár=year)
+            df = df.assign(Mánuður=month)
+            df = df.assign(Ráðuneyti=ministry)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
     return dfs
@@ -114,4 +115,16 @@ if __name__ == "__main__":
         dfs = parse_xlsx(ministry, url)
         all_dfs.append(dfs)
     df = pd.concat(all_dfs)
-    df.to_csv("data.csv", sep=";", quoting=csv.QUOTE_ALL)
+    export_dir = pathlib.Path.cwd() / "data"
+    export_dir.mkdir(parents=True, exist_ok=True)
+    csv_filename = export_dir / "data.csv"
+    db_filename = export_dir / "data.db"
+    df.to_csv(csv_filename, sep=";", quoting=csv.QUOTE_ALL, index=False)
+    dicts = df.to_dict(orient="records")
+    db = dataset.connect("sqlite:///" + db_filename.as_posix())
+    table = db.create_table(
+        "malaskrar",
+    )
+    table.upsert_many(dicts, ["Málsnúmer", "Mánuður", "Ár"])
+    print(dicts)
+    print(df)
