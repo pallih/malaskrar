@@ -121,7 +121,7 @@ if __name__ == "__main__":
     db_filename = export_dir / "malaskrar.db"
     df.to_csv(csv_filename, sep=";", quoting=csv.QUOTE_ALL, index=False)
     dicts = df.to_dict(orient="records")
-    db = dataset.connect("sqlite:///" + db_filename.as_posix())
+    db = dataset.connect("sqlite:///" + db_filename.as_posix(), sqlite_wal_mode=False)
     table = db.create_table(
         "malaskrar",
     )
