@@ -44,6 +44,15 @@ class IcelandicDateParserInfo(parser.parserinfo):
         return self
 
 
+replacements = {"Nov ": "nóv "}
+
+
+def replace_bogus_values(value):
+    for k, v in replacements.items():
+        value = value.replace(k, v)
+    return value
+
+
 def find_xlsx_files(url):
     r = requests.get(url)
     root = lxml.html.fromstring(r.text)
@@ -81,9 +90,15 @@ def parse_xlsx(ministry, url):
                 if col.value:
                     col.value = replace_newlines(col.value)
             sheetname = openpyxl.utils.escape.unescape(sheet.title).strip()
+            sheetname = replace_bogus_values(sheetname)
             try:
                 sheetdate = parser.parse(
                     sheetname, parserinfo=IcelandicDateParserInfo()
+                )
+                print(
+                    "   - Parsed month: {}, year: {}".format(
+                        sheetdate.strftime("%m"), sheetdate.strftime("%Y")
+                    )
                 )
             except parser.ParserError as e:
                 print("ERRRROR")
