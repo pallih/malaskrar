@@ -52,6 +52,13 @@ jobs:
       run: python scraper.py
     - name: Create commit message
       run: csv-diff data/malaskrar-old.csv data/malaskrar.csv > message.txt
+    - name: Check if message is empty
+      uses: mathiasvr/command-output@v1
+      id: message_contents
+      with:
+        [ -s message.txt ] && echo "" || echo "Engar breytingar"
+    - name: Append to message.txt
+      run: echo ${{ steps.message_contents.outputs.stdout }} >> message.txt
     - name: Deploy to Vercel
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
