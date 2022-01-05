@@ -17,23 +17,34 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: "3.10"
-    - uses: actions/cache@v2
-      name: Configure pip caching
+    - uses: syphar/restore-virtualenv@v1
+      id: cache-virtualenv
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - uses: actions/cache@v2
-      name: Configure pip caching
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Install Python dependencies
-      run: |
-        pip install -r requirements.txt
+        requirement_files: requirements.txt
+    - uses: syphar/restore-pip-download-cache@v1
+      if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
+      # the package installation will only be executed when the
+      # requirements-files have changed.
+    - run: pip install -r requirements.txt
+      if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+    # - uses: actions/cache@v2
+    #   name: Configure pip caching
+    #   with:
+    #     path: ~/.cache/pip
+    #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-pip-
+    # - uses: actions/cache@v2
+    #   name: Configure pip caching
+    #   with:
+    #     path: ~/.cache/pip
+    #     key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-pip-
+    # - name: Install Python dependencies
+    #   run: |
+    #     pip install -r requirements.txt
     - name: Copy old csv file
       run: |
         cp data/malaskar.csv malaskrar-old.csv
