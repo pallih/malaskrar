@@ -52,13 +52,13 @@ jobs:
       run: python scraper.py
     - name: Create commit message
       run: csv-diff data/malaskrar-old.csv data/malaskrar.csv > message.txt
-    - name: Check if message is empty
-      uses: mathiasvr/command-output@v1
-      id: message_contents
+    - name: Test1
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@v1.1.0
       with:
-        [ -s message.txt ] && echo '' || echo 'Engar breytingar'
+        format: "YYYY_MM_DD"
     - name: Append to message.txt
-      run: echo ${{ steps.message_contents.outputs.stdout }} >> message.txt
+      run: echo "Keyrsla ${{ steps.t1.outputs.day }}-${{ steps.t1.outputs.month }}-${{ steps.t1.outputs.year }}" >> message.txt
     - name: Deploy to Vercel
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -75,7 +75,7 @@ jobs:
         git add data/malaskrar.db
         git config --global user.email "malaskrarbot@example.com"
         git config --global user.name "Málaskrár þjarkur"
-        git diff-index --quiet HEAD -- data/malaskrar.csv data/malaskrar.db || git commit -F message.txt
+        git diff-index --quiet HEAD -- data/malaskrar.csv data/malaskrar.db || git commit --allow-empty -a -F message.txt
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
