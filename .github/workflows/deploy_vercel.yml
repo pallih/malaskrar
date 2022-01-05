@@ -68,7 +68,7 @@ jobs:
         git add data/malaskrar.db
         git config --global user.email "malaskrarbot@example.com"
         git config --global user.name "Málaskrár þjarkur"
-        git commit -F message.txt
+        git diff-index --quiet HEAD -- data/malaskrar.csv data/malaskrar.db || git commit -F message.txt
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
