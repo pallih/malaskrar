@@ -3,12 +3,14 @@ alembic==1.7.5
 anyio==3.4.0
 asgi-csrf==0.9
 asgiref==3.4.1
+attrs==21.4.0
 banal==1.0.6
 black==21.12b0
 certifi==2021.10.8
 charset-normalizer==2.0.9
 click==8.0.3
 click-default-group==1.2.2
+csvdiff==0.3.3
 dataset==1.5.2
 datasette==0.59.4
 datasette-publish-vercel==0.12
@@ -22,6 +24,7 @@ idna==3.3
 itsdangerous==2.0.1
 janus==0.7.0
 Jinja2==3.0.3
+jsonschema==4.3.3
 lxml==4.6.4
 Mako==1.1.6
 MarkupSafe==2.0.1
@@ -36,6 +39,7 @@ Pint==0.18
 platformdirs==2.4.0
 pluggy==1.0.0
 pyparsing==3.0.6
+pyrsistent==0.18.0
 python-baseconv==1.2.2
 python-dateutil==2.8.2
 python-multipart==0.0.5
