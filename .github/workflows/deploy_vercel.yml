@@ -47,7 +47,7 @@ jobs:
     #     pip install -r requirements.txt
     - name: Copy old csv file
       run: |
-        cp data/malaskar.csv malaskrar-old.csv
+        cp data/malaskrar.csv data/malaskrar-old.csv
     - name: Build database and csv
       run: python scraper.py
     - name: Create commit message
