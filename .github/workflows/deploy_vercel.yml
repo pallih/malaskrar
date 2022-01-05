@@ -63,12 +63,12 @@ jobs:
           --about "Málaskrár ráðuneyta - uppfært tvisvar í viku" \
           --about_url "https://github.com/pallih/malaskrar"
     - name: Commit changes
-        run: |
-          git add data/malaskrar.csv
-          git add data/malaskrar.db
-          git config --global user.email "malaskrarbot@example.com"
-          git config --global user.name "Málaskrár þjarkur"
-          git commit -F message.txt
+      run: |
+        git add data/malaskrar.csv
+        git add data/malaskrar.db
+        git config --global user.email "malaskrarbot@example.com"
+        git config --global user.name "Málaskrár þjarkur"
+        git commit -F message.txt
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
