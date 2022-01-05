@@ -34,8 +34,13 @@ jobs:
     - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
+    - name: Copy old csv file
+      run: |
+        cp data/malaskar.csv malaskrar-old.csv
     - name: Build database and csv
       run: python scraper.py
+    - name: Create commit message
+        run: csv-diff data/malaskrar-old.csv data/malaskrar.csv > message.txt
     - name: Deploy to Vercel
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -46,4 +51,16 @@ jobs:
           --title "Málaskrár ráðuneyta" \
           --about "Málaskrár ráðuneyta - uppfært tvisvar í viku" \
           --about_url "https://github.com/pallih/malaskrar"
-    - uses: stefanzweifel/git-auto-commit-action@v4
+    - name: Commit changes
+        run: |
+          git add data/malaskrar.csv
+          git add data/malaskrar.db
+          git config --global user.email "malaskrarbot@example.com"
+          git config --global user.name "Málaskrár þjarkur"
+          git commit -F message.txt
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+    # - uses: stefanzweifel/git-auto-commit-action@v4
