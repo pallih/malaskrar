@@ -51,14 +51,14 @@ jobs:
     - name: Build database and csv
       run: python scraper.py
     - name: Create commit message
-      run: csv-diff data/malaskrar-old.csv data/malaskrar.csv > message.txt
+      run: csv-diff data/malaskrar-old.csv data/malaskrar.csv > data/message.txt
     - name: Get date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@v1.1.0
       with:
         format: "YYYY_MM_DD"
     - name: Append to message.txt
-      run: echo "Keyrsla ${{ steps.date.outputs.day }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.year }}" >> message.txt
+      run: echo "Keyrsla ${{ steps.date.outputs.day }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.year }} [skip ci]" >> data/message.txt
     - name: Deploy to Vercel
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -77,7 +77,7 @@ jobs:
         git add data/malaskrar.db
         git config --global user.email "malaskrarbot@example.com"
         git config --global user.name "Málaskrár þjarkur"
-        git diff-index --quiet HEAD -- data/malaskrar.csv data/malaskrar.db || git commit --allow-empty -a -F message.txt
+        git commit --allow-empty -a -F data/message.txt
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
