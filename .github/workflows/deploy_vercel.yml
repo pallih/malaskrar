@@ -71,6 +71,8 @@ jobs:
           --about_url "https://github.com/pallih/malaskrar"
     - name: Commit changes
       run: |
+        git rm --cached data/malaskrar.csv
+        git rm --cached data/malaskrar.db
         git add data/malaskrar.csv
         git add data/malaskrar.db
         git config --global user.email "malaskrarbot@example.com"
