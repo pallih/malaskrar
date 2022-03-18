@@ -55,14 +55,35 @@ def replace_bogus_values(value):
 
 def find_xlsx_files(url):
     r = requests.get(url)
+    urls = []
     root = lxml.html.fromstring(r.text)
-    lis = root.xpath('//div[@class="l-user-content"]/ul/li')
-    lis = [x.text_content().strip() for x in lis]
-    hrefs = root.xpath('//div[@class="l-user-content"]/ul/li//a')
-    hrefs = ["https://www.stjornarradid.is" + x.attrib["href"] for x in hrefs]
-    urls = {k: v for (k, v) in zip(lis, hrefs)}
+    lis = root.xpath('//span[@class="excel"]')
+    # divs = root.xpath('//div[@class="column"]//a/@href')
+    hrefs = root.xpath("//div[contains(@class,'column')]//a")
+    for href in hrefs:
+        if "xlsx" in href.attrib["href"]:
+            url_item = {}
+            ministry = href.text_content().strip()
+            url = "https://www.stjornarradid.is" + href.attrib["href"]
+            if ministry:
+                url_item[ministry] = url
+                urls.append(url_item)
+    # for li in lis:
+    #     url_item = {}
+    #     ministry = li.text_content().strip()
+    #     url_href = li.xpath("a")
+    #     if url_href:
+    #         url_href = "https://www.stjornarradid.is" + url_href[0].attrib["href"]
+    #         url_item[ministry] = url_href
+    #         urls.append(url_item)
+    # lis = [x.text_content().strip() for x in lis]
+    # hrefs = root.xpath('//span[@class="excel"]/a')
+    # hrefs = ["https://www.stjornarradid.is" + x.attrib["href"] for x in hrefs]
+    # urls = {k: v for (k, v) in zip(lis, hrefs)}
     if urls:
         print("Found {} urls".format(len(urls)))
+        for url in urls:
+            print(url)
     else:
         print("Found no urls")
     return urls
