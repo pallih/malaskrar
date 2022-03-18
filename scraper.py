@@ -62,11 +62,15 @@ def find_xlsx_files(url):
     hrefs = root.xpath("//div[contains(@class,'column')]//a")
     for href in hrefs:
         if "xlsx" in href.attrib["href"]:
+            year = href.xpath("./preceding::h2")
+            selected_year = year[-1:][0].text
             url_item = {}
             ministry = href.text_content().strip()
             url = "https://www.stjornarradid.is" + href.attrib["href"]
             if ministry:
-                url_item[ministry] = url
+                url_item["ministry"] = ministry
+                url_item["url"] = url
+                url_item["year"] = selected_year.strip()
                 urls.append(url_item)
     # for li in lis:
     #     url_item = {}
@@ -95,7 +99,7 @@ def replace_newlines(value):
     return value
 
 
-def parse_xlsx(ministry, url):
+def parse_xlsx(ministry, url, year):
     r = requests.get(url)
     all_dfs = []
     with NamedTemporaryFile() as tmp:
@@ -121,6 +125,12 @@ def parse_xlsx(ministry, url):
                         sheetdate.strftime("%m"), sheetdate.strftime("%Y")
                     )
                 )
+                if sheetdate.strftime("%Y") != year:
+                    print(
+                        "   -  Changing year from {} to {}".format(
+                            sheetdate.strftime("%Y"), year
+                        )
+                    )
             except parser.ParserError as e:
                 print("ERRRROR")
                 print(e)
@@ -133,10 +143,10 @@ def parse_xlsx(ministry, url):
                 sheet_name=sheet.title,
                 usecols="A:B",
             )
-            year = sheetdate.strftime("%Y")
-            month = sheetdate.strftime("%m")
-            df = df.assign(Ár=year)
-            df = df.assign(Mánuður=month)
+            year_assigned = year
+            month_assigned = sheetdate.strftime("%m")
+            df = df.assign(Ár=year_assigned)
+            df = df.assign(Mánuður=month_assigned)
             df = df.assign(Ráðuneyti=ministry)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
@@ -146,9 +156,13 @@ def parse_xlsx(ministry, url):
 if __name__ == "__main__":
     xlsx_urls = find_xlsx_files(overview_url)
     all_dfs = []
-    for ministry, url in xlsx_urls.items():
-        print("Parsing {}".format(ministry))
-        dfs = parse_xlsx(ministry, url)
+    for item in xlsx_urls:
+        print(
+            "Parsing {} from url {} for year {}".format(
+                item["ministry"], item["url"], item["year"]
+            )
+        )
+        dfs = parse_xlsx(item["ministry"], item["url"], item["year"])
         all_dfs.append(dfs)
     df = pd.concat(all_dfs)
     export_dir = pathlib.Path.cwd() / "data"
