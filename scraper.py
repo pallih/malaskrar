@@ -44,7 +44,7 @@ class IcelandicDateParserInfo(parser.parserinfo):
         return self
 
 
-replacements = {"Nov ": "nóv ", "IRN ": "", "SRN - ", ""}
+replacements = {"Nov ": "nóv ", "IRN ": "", "SRN - ": ""}
 
 
 def replace_bogus_values(value):
