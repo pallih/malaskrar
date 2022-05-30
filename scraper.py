@@ -8,6 +8,8 @@ from io import BytesIO
 from tempfile import NamedTemporaryFile
 import pathlib
 import dataset
+import re
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 
 overview_url = "https://www.stjornarradid.is/gogn/malaskrar-raduneyta/"
 
@@ -96,6 +98,7 @@ def find_xlsx_files(url):
 def replace_newlines(value):
     value = openpyxl.utils.escape.unescape(value).replace("\n", " ").replace("\r", " ")
     value = " ".join(value.split())
+    value = ILLEGAL_CHARACTERS_RE.sub(r"", value)
     return value
 
 
