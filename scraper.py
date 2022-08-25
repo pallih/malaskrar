@@ -123,17 +123,12 @@ def parse_xlsx(ministry, url, year):
                 sheetdate = parser.parse(
                     sheetname, parserinfo=IcelandicDateParserInfo()
                 )
+
                 print(
                     "   - Parsed month: {}, year: {}".format(
                         sheetdate.strftime("%m"), sheetdate.strftime("%Y")
                     )
                 )
-                if sheetdate.strftime("%Y") != year:
-                    print(
-                        "   -  Changing year from {} to {}".format(
-                            sheetdate.strftime("%Y"), year
-                        )
-                    )
             except parser.ParserError as e:
                 print("ERRRROR")
                 print(e)
@@ -146,18 +141,20 @@ def parse_xlsx(ministry, url, year):
                 sheet_name=sheet.title,
                 usecols="A:B",
             )
-            year_assigned = year
             month_assigned = sheetdate.strftime("%m")
-            df = df.assign(Ár=year_assigned)
+            df["Ár"] = "20" + df.Málsnúmer.str.extract("(\d\d)", expand=True)
             df = df.assign(Mánuður=month_assigned)
             df = df.assign(Ráðuneyti=ministry)
+            print(df)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
+
     return dfs
 
 
 if __name__ == "__main__":
     xlsx_urls = find_xlsx_files(overview_url)
+
     all_dfs = []
     for item in xlsx_urls:
         print(
@@ -168,6 +165,7 @@ if __name__ == "__main__":
         dfs = parse_xlsx(item["ministry"], item["url"], item["year"])
         all_dfs.append(dfs)
     df = pd.concat(all_dfs)
+    df.drop_duplicates(subset=["Málsnúmer"], keep="first", inplace=True)
     export_dir = pathlib.Path.cwd() / "data"
     export_dir.mkdir(parents=True, exist_ok=True)
     csv_filename = export_dir / "malaskrar.csv"
@@ -178,4 +176,4 @@ if __name__ == "__main__":
     table = db.create_table(
         "malaskrar",
     )
-    table.upsert_many(dicts, ["Málsnúmer", "Mánuður", "Ár"])
+    table.upsert_many(dicts, ["Málsnúmer"])
