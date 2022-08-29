@@ -142,7 +142,10 @@ def parse_xlsx(ministry, url, year):
                 usecols="A:B",
             )
             month_assigned = sheetdate.strftime("%m")
-            df["Ár"] = "20" + df.Málsnúmer.str.extract("(\d\d)", expand=True)
+            try:
+                df["Ár"] = "20" + df.Málsnúmer.str.extract("(\d\d)", expand=True)
+            except AttributeError:
+                continue
             df = df.assign(Mánuður=month_assigned)
             df = df.assign(Ráðuneyti=ministry)
             print(df)
