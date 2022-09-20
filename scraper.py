@@ -59,8 +59,6 @@ def find_xlsx_files(url):
     r = requests.get(url)
     urls = []
     root = lxml.html.fromstring(r.text)
-    lis = root.xpath('//span[@class="excel"]')
-    # divs = root.xpath('//div[@class="column"]//a/@href')
     hrefs = root.xpath("//div[contains(@class,'column')]//a")
     for href in hrefs:
         if "xlsx" in href.attrib["href"]:
@@ -74,18 +72,6 @@ def find_xlsx_files(url):
                 url_item["url"] = url
                 url_item["year"] = selected_year.strip()
                 urls.append(url_item)
-    # for li in lis:
-    #     url_item = {}
-    #     ministry = li.text_content().strip()
-    #     url_href = li.xpath("a")
-    #     if url_href:
-    #         url_href = "https://www.stjornarradid.is" + url_href[0].attrib["href"]
-    #         url_item[ministry] = url_href
-    #         urls.append(url_item)
-    # lis = [x.text_content().strip() for x in lis]
-    # hrefs = root.xpath('//span[@class="excel"]/a')
-    # hrefs = ["https://www.stjornarradid.is" + x.attrib["href"] for x in hrefs]
-    # urls = {k: v for (k, v) in zip(lis, hrefs)}
     if urls:
         print("Found {} urls".format(len(urls)))
         for url in urls:
@@ -102,8 +88,20 @@ def replace_newlines(value):
     return value
 
 
+def replace_header(value):
+    if "Efni" in value:
+        return "Efni"
+    else:
+        return value
+
+
 def parse_xlsx(ministry, url, year):
-    r = requests.get(url)
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+    except requests.HTTPError as exc:
+        print("Error: {}".format(exc.response.status_code))
+        return None
     all_dfs = []
     with NamedTemporaryFile() as tmp:
         wb = openpyxl.load_workbook(BytesIO(r.content))
@@ -114,24 +112,26 @@ def parse_xlsx(ministry, url, year):
                     header_row = int(col.row) - 1
                 if col.value:
                     col.value = replace_newlines(col.value)
+
             for col in sheet["B"]:
                 if col.value:
                     col.value = replace_newlines(col.value)
+                    col.value = replace_header(col.value)
             sheetname = openpyxl.utils.escape.unescape(sheet.title).strip()
             sheetname = replace_bogus_values(sheetname)
-            try:
-                sheetdate = parser.parse(
-                    sheetname, parserinfo=IcelandicDateParserInfo()
-                )
+            # try:
+            #     sheetdate = parser.parse(
+            #         sheetname, parserinfo=IcelandicDateParserInfo()
+            #     )
 
-                print(
-                    "   - Parsed month: {}, year: {}".format(
-                        sheetdate.strftime("%m"), sheetdate.strftime("%Y")
-                    )
-                )
-            except parser.ParserError as e:
-                print("ERRRROR")
-                print(e)
+            #     print(
+            #         "   - Parsed month: {}, year: {}".format(
+            #             sheetdate.strftime("%m"), sheetdate.strftime("%Y")
+            #         )
+            #     )
+            # except parser.ParserError as e:
+            #     print("ERRRROR")
+            #     print(e)
             wb.save(tmp.name)
             tmp.seek(0)
             stream = tmp.read()
@@ -141,14 +141,17 @@ def parse_xlsx(ministry, url, year):
                 sheet_name=sheet.title,
                 usecols="A:B",
             )
-            month_assigned = sheetdate.strftime("%m")
+            # month_assigned = sheetdate.strftime("%m")
             try:
                 df["Ár"] = "20" + df.Málsnúmer.str.extract("(\d\d)", expand=True)
             except AttributeError:
                 continue
-            df = df.assign(Mánuður=month_assigned)
+            try:
+                df["Mánuður"] = df.Málsnúmer.str.extract("\d\d(\d\d)", expand=True)
+            except AttributeError:
+                continue
+            # df = df.assign(Mánuður=month_assigned)
             df = df.assign(Ráðuneyti=ministry)
-            print(df)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
 
