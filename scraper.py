@@ -88,13 +88,6 @@ def replace_newlines(value):
     return value
 
 
-def replace_header(value):
-    if "Efni" in value:
-        return "Efni"
-    else:
-        return value
-
-
 def parse_xlsx(ministry, url, year):
     try:
         r = requests.get(url)
@@ -116,7 +109,6 @@ def parse_xlsx(ministry, url, year):
             for col in sheet["B"]:
                 if col.value:
                     col.value = replace_newlines(col.value)
-                    col.value = replace_header(col.value)
             sheetname = openpyxl.utils.escape.unescape(sheet.title).strip()
             sheetname = replace_bogus_values(sheetname)
             # try:
@@ -140,6 +132,7 @@ def parse_xlsx(ministry, url, year):
                 header=header_row,
                 sheet_name=sheet.title,
                 usecols="A:B",
+                names=["Málsnúmer", "Efni"],
             )
             # month_assigned = sheetdate.strftime("%m")
             try:
