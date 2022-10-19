@@ -111,19 +111,7 @@ def parse_xlsx(ministry, url, year):
                     col.value = replace_newlines(col.value)
             sheetname = openpyxl.utils.escape.unescape(sheet.title).strip()
             sheetname = replace_bogus_values(sheetname)
-            # try:
-            #     sheetdate = parser.parse(
-            #         sheetname, parserinfo=IcelandicDateParserInfo()
-            #     )
 
-            #     print(
-            #         "   - Parsed month: {}, year: {}".format(
-            #             sheetdate.strftime("%m"), sheetdate.strftime("%Y")
-            #         )
-            #     )
-            # except parser.ParserError as e:
-            #     print("ERRRROR")
-            #     print(e)
             wb.save(tmp.name)
             tmp.seek(0)
             stream = tmp.read()
@@ -134,7 +122,6 @@ def parse_xlsx(ministry, url, year):
                 usecols="A:B",
                 names=["Málsnúmer", "Efni"],
             )
-            # month_assigned = sheetdate.strftime("%m")
             try:
                 df["Ár"] = "20" + df.Málsnúmer.str.extract("(\d\d)", expand=True)
             except AttributeError:
@@ -143,7 +130,6 @@ def parse_xlsx(ministry, url, year):
                 df["Mánuður"] = df.Málsnúmer.str.extract("\d\d(\d\d)", expand=True)
             except AttributeError:
                 continue
-            # df = df.assign(Mánuður=month_assigned)
             df = df.assign(Ráðuneyti=ministry)
             all_dfs.append(df)
     dfs = pd.concat(all_dfs)
