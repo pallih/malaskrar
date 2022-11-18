@@ -100,6 +100,8 @@ def parse_xlsx(ministry, url, year):
         wb = openpyxl.load_workbook(BytesIO(r.content))
         for sheet in wb.worksheets:
             print("Parsing sheet: {}".format(sheet))
+            # default header row
+            header_row = 1
             for col in sheet["A"]:
                 if col.value == "Málsnúmer":
                     header_row = int(col.row) - 1
